@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@require[scribble/eval @for-label[ocelot]]
+@require[scribble/eval @for-label[ocelot (only-in rosette term?)]]
 
 @(define my-eval (make-base-eval #:lang 'racket))
 @(my-eval `(require rosette ocelot))
@@ -136,19 +136,108 @@ context will not also be manipulating Rosette expressions.
 @defproc[(+ [a node/expr?] [b node/expr?] ...) node/expr?]{
   Produces the union of two or more relations.}
 
+@defproc[(& [a node/expr?] [b node/expr?] ...) node/expr?]{
+  Produces the intersection of two or more relations.}
+
+@defproc[(- [a node/expr?] [b node/expr?] ...) node/expr?]{
+ Produces the first relation, but without any tuples present in the remaining relations (i.e., set difference).
+ 
+ @racket[(- a b c)] is equivalent to @racket[((- a b) c)].}
+
+@defproc[(-> [a node/expr?] [b node/expr?] ...) node/expr?]{
+  Produces the cross product of two or more relations.}
+
+@defproc[(~ [a node/expr?]) node/expr?]{
+  Produces the inverse of a relation of arity 2.
+
+  If ⟨@italic{x},@italic{y}⟩ is an element of @racket[a], then ⟨@italic{y},@italic{x}⟩ is an element of @racket[(~ a)].}
+
 @defproc[(join [a node/expr?] [b node/expr?] ...) node/expr?]{
   Produces the relational join of two or more relations.}
 
+@defproc[(<: [a node/expr?] [b node/expr?]) node/expr?]{
+ Produces the relation containing all tuples in @racket[b] whose first element
+ is contained in @racket[a], which must have arity 1.}
+
+@defproc[(:> [a node/expr?] [b node/expr?]) node/expr?]{
+ Produces the relation containing all tuples in @racket[a] whose last element
+ is contained in @racket[b], which must have arity 1.}
+
+@defthing[none node/expr?]{
+ A relation of arity 1 that contains no tuples.}
+
+@defthing[univ node/expr?]{
+ A relation of arity 1 that contains the tuple ⟨@italic{x}⟩ for every atom @italic{x} in the universe.}
+
+@defthing[iden node/expr?]{
+ A relation of arity 2 that contains, for every atom @italic{x} in the universe,
+ the tuple ⟨@italic{x}, @italic{x}⟩.
+
+ @racket[iden] is equivalent to @racket[(-> univ univ)].}
+
 @defproc[(^ [expr node/expr?]) node/expr?]{
-  Produces the irreflexive transitive closure of a relation.}
+  Produces the irreflexive transitive closure of a relation, which must have arity 2.}
+
+@defproc[(* [expr node/expr?]) node/expr?]{
+  Produces the reflexive transitive closure of a relation, which must have arity 2.
+
+  @racket[(* a)] is equivalent to @racket[(+ (^ a) iden)].}
+
+@defform[(set (decl ...) body-formula)
+         #:grammar [(decl [id domain-expr])]
+         #:contracts ([body-formula node/formula?]
+                      [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
+  Produces a set comprehension, which is a relation with arity equal to the number of @racket[decl]s provided.
+  The set comprehension contains a tuple ⟨@italic{x}@subscript{1}, ⋯, @italic{x}@subscript{n}⟩
+  if and only if each @italic{x}@subscript{i} is an element of the corresponding @racket[domain-expr]@subscript{i}
+  (which must be an expression of arity 1) and, when each identifier @racket[id]@subscript{i}
+  is bound to the corresponding singleton tuple ⟨@italic{x}@subscript{i}⟩,
+  @racket[body-formula] evaluates to true.}
+
 
 @subsubsection{Formulas}
 
-@defproc[(! [f node/formula?]) node/formula?]{
-  Produces a formula that is true if and only if @racket[f] is false.}
-
 @defproc[(in [a node/expr?] [b node/expr?]) node/formula?]{
   Produces a formula that is true if and only if @racket[a] is a subset of @racket[b].}
+
+@defproc[(= [a node/expr?] [b node/expr?]) node/formula?]{
+  Produces a formula that is true if and only if @racket[a] and @racket[b] contain the same elements.}
+
+@defproc[(and [a node/formula?] [b node/formula?] ...) node/formula?]{
+  Produces a formula that is true if and only if every input formula is true.}
+
+@defproc[(or [a node/formula?] [b node/formula?] ...) node/formula?]{
+  Produces a formula that is true if and only if at least one of the input formulas is true.}
+
+@defproc[(=> [a node/formula?] [b node/formula?]) node/formula?]{
+  Produces a formula that is true if and only if @racket[a] implies @racket[b].
+
+  Equivalent to @racket[(or (! a) b)].}
+
+@deftogether[(
+  @defproc[(! [f node/formula?]) node/formula?]
+  @defproc[(not [f node/formula?]) node/formula?])]{
+  Produces a formula that is true if and only if @racket[f] is false.}
+
+
+
+
+@subsubsection{Quantifiers and Multiplicities}
+
+Most quantifiers each come in two forms.
+One form takes no @racket[decl]s, and a body which is an expression,
+and evaluates to true if and only if the body has the appropriate cardinality.
+The second form takes @racket[decl]s, and a body which is a formula,
+and evaluate to true if and only if the number of bindings of the @racket[decl]s
+under which the body evaluates to true has the appropriate cardinality.
+
+@defform[(all (decl ...) body-formula)
+         #:grammar [(decl [id domain-expr])]
+         #:contracts ([body-formula node/formula?]
+                      [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
+  Produces a formula that is true if and only if, for every binding of each @racket[id]
+  to a singleton subset of the corresponding @racket[domain-expr] (which must be an expression of arity 1),
+  @racket[body-formula-or-expr] (which must be a formula) evaluates to true under that binding.}
 
 @defform[(some maybe-decls body-formula-or-expr)
          #:grammar [(maybe-decls (code:line) (decl ...))
@@ -156,10 +245,10 @@ context will not also be manipulating Rosette expressions.
          #:contracts ([body-formula-or-expr (or/c node/formula? node/expr?)]
                       [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
   If no @racket[decl]s are provided, produces a formula that is true if and only if
-  @racket[body-formula-or-expr] (which must be an expression) is not empty.
+  @racket[body-formula-or-expr] (which must be an expression) is @italic{not empty}.
   
   If @racket[decls] are provided,
-  produces a formula that is true if and only if there exists a binding of each @racket[id]
+  produces a formula that is true if and only if there exists @italic{some} binding of each @racket[id]
   to a singleton subset of the corresponding @racket[domain-expr] (which must be an expression of arity 1)
   such that @racket[body-formula-or-expr] (which must be a formula) evaluates to true under that binding.}
 
@@ -169,15 +258,47 @@ context will not also be manipulating Rosette expressions.
          #:contracts ([body-formula-or-expr (or/c node/formula? node/expr?)]
                       [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
   If no @racket[decl]s are provided, produces a formula that is true if and only if
-  @racket[body-formula-or-expr] (which must be an expression) is empty.
+  @racket[body-formula-or-expr] (which must be an expression) is @italic{empty}.
   
   If @racket[decls] are provided,
-  produces a formula that is true if and only if there exists no binding of each @racket[id]
+  produces a formula that is true if and only if there exists @italic{no} binding of each @racket[id]
   to a singleton subset of the corresponding @racket[domain-expr] (which must be an expression of arity 1)
   such that @racket[body-formula-or-expr] (which must be a formula) evaluates to true under that binding.
 
   In both cases, @racket[(no ...)] is equivalent to the negation @racket[(! (some ...))].
 }
+
+@defform[(one maybe-decls body-formula-or-expr)
+         #:grammar [(maybe-decls (code:line) (decl ...))
+                    (decl [id domain-expr])]
+         #:contracts ([body-formula-or-expr (or/c node/formula? node/expr?)]
+                      [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
+  If no @racket[decl]s are provided, produces a formula that is true if and only if
+  @racket[body-formula-or-expr] (which must be an expression) contains @italic{exactly one} tuple.
+  
+  If @racket[decls] are provided,
+  produces a formula that is true if and only if there exists @italic{exactly one} binding of the @racket[id]s
+  to a singleton subset of the corresponding @racket[domain-expr]s (which must be expressions of arity 1)
+  such that @racket[body-formula-or-expr] (which must be a formula) evaluates to true under that binding.
+}
+
+@defform[(lone maybe-decls body-formula-or-expr)
+         #:grammar [(maybe-decls (code:line) (decl ...))
+                    (decl [id domain-expr])]
+         #:contracts ([body-formula-or-expr (or/c node/formula? node/expr?)]
+                      [domain-expr (and/c node/expr? (equal? (node/expr/arity expr) 1))])]{
+  If no @racket[decl]s are provided, produces a formula that is true if and only if
+  @racket[body-formula-or-expr] (which must be an expression) contains @italic{at most one} tuple.
+  
+  If @racket[decls] are provided,
+  produces a formula that is true if and only if there exists @italic{at most one} binding of the @racket[id]s
+  to a singleton subset of the corresponding @racket[domain-expr]s (which must be expressions of arity 1)
+  such that @racket[body-formula-or-expr] (which must be a formula) evaluates to true under that binding.
+
+  In both cases, @racket[(lone ...)] is equivalent to the disjunction @racket[(or (no ...) (one ...))].
+}
+
+
 
 @subsection{Scopes}
 
@@ -221,6 +342,10 @@ The bounds, in turn, consist of tuples drawn from a universe of discourse.
                  [bnds (listof bound?)]) bounds?]{
   Collect a set of relation bounds and a universe together for use by @racket[interpret].}
 
+@defproc[(bounds? [a any/c]) boolean?]{
+  Return true if and only if @racket[a] is an instance of @racket[bounds].}
+
+
 @subsection{Solving}
 
 Ocelot compiles relational formulas to Rosette constraints,
@@ -235,3 +360,50 @@ which can then be used directly with Rosette's solving and verification features
 
   The @racket[bounds] must provide a bound for every free relation mentioned in @racket[formula].}
 
+@defproc[(interpret* [formula node/formula?]
+                     [interp interpretation?]) term?]{
+  Like @racket[interpret], but takes as input an interpretation instead of bounds.
+       
+  @racket[interpret*], together with @racket[instantiate-bounds] and @racket[interpretation->relations],
+  are useful for lifting the results of a satisfiable Rosette query to a model for relations
+  (see @secref{Interpretations} below).
+
+  The @racket[interpretation] must provide an interpretation for every free relation mentioned in @racket[formula].}
+
+@subsubsection{Interpretations}
+
+Ocelot reduces relational formulas to boolean formulas by way of interpretations,
+which assign boolean variables for the presence of each possible tuple in a relation.
+Interpretations can be used to list a satisfying model from a Rosette query
+back to the relations that defined the solved formula.
+
+@defproc[(instantiate-bounds [bounds bounds?]) interpretation?]{
+  Create an interpretation for each relation bound by @racket[bounds].
+  An inteerpretation of a relation @racket[a] is a set of boolean variables,
+  one for each potential tuple in the relation, that are true if and only if
+  the corresponding tuple is present in @racket[a].}
+
+@defproc[(interpretation->relations [interp interpretation?])
+         (hash/c node/expr/relation? (listof (listof symbol?)))]{
+  Returns a hash table that maps each relation bound by @racket[interp]
+  to a list of tuples contained in that relation under the interpretation @racket[interp].
+
+  @racket[interp] must be fully concrete (contains no symbolic boolean variables).}
+
+@examples[#:eval my-eval
+  (code:comment @#,elem{Declare a cats relation and create an interpretation for it})
+  (define cats (declare-relation 1 "cats"))
+  (define bCats (make-upper cats '((a) (b) (c) (d))))
+  (define allCatBounds (bounds U (list bCats)))
+  (define iCats (instantiate-bounds allCatBounds))
+  iCats
+  (code:comment @#,elem{Find an interesting model for the cats relation})
+  (define F (and (some cats) (some (- univ cats))))
+  (define resultCats (solve (assert (interpret* F iCats))))
+  (sat? resultCats)
+  (code:comment @#,elem{Lift the model to lists of tuples for each relation})
+  (define catsModel (interpretation->relations (evaluate iCats resultCats)))
+  (hash-ref catsModel cats)
+  ]
+
+  
