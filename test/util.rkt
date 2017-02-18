@@ -28,7 +28,7 @@
        (quasisyntax/loc stx
          (with-check-info* (list (make-check-location '#,loc))
            (thunk
-            (define lbnds (list (make-exact r1 v1) ...))
+            (define lbnds (list (make-exact-bound r1 v1) ...))
             (define bnds (bounds U lbnds))
             (unless (null? result)
               (check-equal? (length (first result)) (relation-arity E)))
@@ -44,7 +44,7 @@
          (with-check-info* (list (make-check-location '#,loc))
            (thunk
             (let ([Ex E])
-              (define lbnds (list (make-exact r1 v1) ...))
+              (define lbnds (list (make-exact-bound r1 v1) ...))
               (define bnds (bounds U lbnds))
               (define E* (interpret Ex bnds))
               (define S (with-handlers ([exn:fail? (const (unsat))])
@@ -58,7 +58,7 @@
        (quasisyntax/loc stx
          (with-check-info* (list (make-check-location '#,loc))
            (thunk
-            (define lbnds (list (make-exact r1 v1) ...))
+            (define lbnds (list (make-exact-bound r1 v1) ...))
             (define bnds (bounds U lbnds))
             (define F* (interpret F bnds))
             (check-equal? F* result)))))]))

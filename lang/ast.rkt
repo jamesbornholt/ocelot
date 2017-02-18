@@ -72,7 +72,7 @@
      (with-syntax ([name (format-id #'id "node/expr/op/~a" #'id)])
        (syntax/loc stx
          (begin
-           (struct name node/expr/op () #:transparent)
+           (struct name node/expr/op () #:transparent #:reflection-name 'id)
            (define id
              (lambda e
                (if ($and @op (for/and ([a e]) ($not (node/expr? a))))
@@ -121,7 +121,7 @@
 (struct node/expr/comprehension node/expr (decls formula)
   #:methods gen:custom-write
   [(define (write-proc self port mode)
-    (fprintf port "(node/comprehension ~a ~a ~a)" 
+    (fprintf port "(comprehension ~a ~a ~a)" 
                   (node/expr-arity self) 
                   (node/expr/comprehension-decls self)
                   (node/expr/comprehension-formula self)))])
@@ -160,7 +160,7 @@
   #:methods gen:custom-write
   [(define (write-proc self port mode)
      (match-define (node/expr/relation arity name) self)
-     (fprintf port "(node/expr/relation ~a ~a)" arity name))])
+     (fprintf port "(relation ~a ~v)" arity name))])
 (define next-name 0)
 (define (declare-relation arity [name #f])
   (let ([name (if (false? name) 
@@ -174,7 +174,10 @@
 
 ;; -- constants ----------------------------------------------------------------
 
-(struct node/expr/constant node/expr (type) #:transparent)
+(struct node/expr/constant node/expr (type) #:transparent
+  #:methods gen:custom-write
+  [(define (write-proc self port mode)
+     (fprintf port "~v" (node/expr/constant-type self)))])
 (define none (node/expr/constant 1 'none))
 (define univ (node/expr/constant 1 'univ))
 (define iden (node/expr/constant 2 'iden))
@@ -194,7 +197,7 @@
      (with-syntax ([name (format-id #'id "node/formula/op/~a" #'id)])
        (syntax/loc stx
          (begin
-           (struct name node/formula/op () #:transparent)
+           (struct name node/formula/op () #:transparent #:reflection-name 'id)
            (define id
              (lambda e
                (if ($and @op (for/and ([a e]) ($not (type? a))))
@@ -241,7 +244,7 @@
   #:methods gen:custom-write
   [(define (write-proc self port mode)
      (match-define (node/formula/quantified quantifier decls formula) self)
-     (fprintf port "(node/formula/quantified ~a ~a ~a)" quantifier decls formula))])
+     (fprintf port "(~a [~a] ~a)" quantifier decls formula))])
 (define (quantified-formula quantifier decls formula)
   (for ([e (map cdr decls)])
     (unless (node/expr? e)
@@ -258,7 +261,7 @@
   #:methods gen:custom-write
   [(define (write-proc self port mode)
      (match-define (node/formula/multiplicity mult expr) self)
-     (fprintf port "(node/formula/multiplicity ~a ~a)" mult expr))])
+     (fprintf port "(~a ~a)" mult expr))])
 (define (multiplicity-formula mult expr)
   (unless (node/expr? expr)
     (raise-arguments-error mult "expr?" expr))

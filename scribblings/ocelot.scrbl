@@ -75,9 +75,9 @@ must be in a relation, and an upper bound defining tuples that may be in a relat
 A @racket[bounds] instance is a list of @racket[bound]s together with a universe of discourse.
 
 @examples[#:eval my-eval
-  (define bDir (make-exact Dir '((a))))
+  (define bDir (make-exact-bound Dir '((a))))
   (define bFile (make-bound File '((b)) '((b) (c) (d))))
-  (define bContents (make-upper contents (cartesian-product '(a b c d) '(a b c d))))
+  (define bContents (make-product-bound contents '(a b c d) '(a b c d)))
   (define allBounds (bounds U (list bDir bFile bContents)))
   ]
 
@@ -117,7 +117,7 @@ and an interpreter to reduce those formulas to Rosette terms.
 
 @subsection{Declaring Relations}
 
-@defproc[(declare-relation [arity natural-number/c] [name string?]) node/expr/relation?]{
+@defproc[(declare-relation [arity natural-number/c] [name string?]) relation?]{
   Returns a new relation of the given arity and name.}
 
 @subsection{Relational Logic}
@@ -316,7 +316,7 @@ The bounds, in turn, consist of tuples drawn from a universe of discourse.
 
 @subsubsection{Bounds}
 
-@defproc[(make-bound [relation node/expr/relation?]
+@defproc[(make-bound [relation relation?]
                      [lower (listof (listof symbol?))]
                      [upper (listof (listof symbol?))]) bound?]{
   Create a new bound for @racket[relation] that constrains it to
@@ -324,19 +324,28 @@ The bounds, in turn, consist of tuples drawn from a universe of discourse.
   in @racket[upper]. Both @racket[lower] and @racket[upper] must be lists of tuples,
   where a tuple is a list of atoms and has the same length as the arity of @racket[relation].}
 
-@defproc[(make-exact [relation node/expr/relation?]
-                     [contents (listof (listof symbol?))]) bound?]{
-  Create a new bound for @racket[relation] that constrains it
+@defproc[(make-exact-bound [relation relation?]
+                           [contents (listof (listof symbol?))]) bound?]{
+  Create a new bound for @racket[relation] that constrains it to
   contain exactly the tuples in @racket[contents].
 
   Equivalent to @racket[(make-bound relation contents contents)].}
 
-@defproc[(make-upper [relation node/expr/relation?]
-                     [contents (listof (listof symbol?))]) bound?]{
-  Create a new bound for @racket[relation] that constrains it
+@defproc[(make-upper-bound [relation relation?]
+                           [contents (listof (listof symbol?))]) bound?]{
+  Create a new bound for @racket[relation] that constrains it to
   contain only the tuples in @racket[contents].
 
   Equivalent to @racket[(make-bound relation '() contents)].}
+
+@defproc[(make-product-bound [relation relation?]
+                             [atoms (listof symbol?)] ...)
+                             bound?]{
+  Create a new bound for @racket[relation] that constrains it to
+  contain only the tuples in the cartesian product of the @racket[atoms].
+  @racket[relation] must have the same arity as the number of @racket[atoms].
+
+  Equivalent to @racket[(make-upper-bound relation (cartesian-product atoms ...))].}
 
 @defproc[(bounds [universe universe?]
                  [bnds (listof bound?)]) bounds?]{
@@ -384,7 +393,7 @@ back to the relations that defined the solved formula.
   the corresponding tuple is present in @racket[a].}
 
 @defproc[(interpretation->relations [interp interpretation?])
-         (hash/c node/expr/relation? (listof (listof symbol?)))]{
+         (hash/c relation? (listof (listof symbol?)))]{
   Returns a hash table that maps each relation bound by @racket[interp]
   to a list of tuples contained in that relation under the interpretation @racket[interp].
 
@@ -393,7 +402,7 @@ back to the relations that defined the solved formula.
 @examples[#:eval my-eval
   (code:comment @#,elem{Declare a cats relation and create an interpretation for it})
   (define cats (declare-relation 1 "cats"))
-  (define bCats (make-upper cats '((a) (b) (c) (d))))
+  (define bCats (make-upper-bound cats '((a) (b) (c) (d))))
   (define allCatBounds (bounds U (list bCats)))
   (define iCats (instantiate-bounds allCatBounds))
   iCats

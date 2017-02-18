@@ -46,9 +46,9 @@
   ; Create bounds for all signatures
   (define bnds
     (for/list ([s (sigs)])
-      (make-upper (sig-relation s)
-                  (apply cartesian-product
-                         (for/list ([r (sig-type s)]) (hash-ref relation->atoms r))))))
+      (apply make-product-bound 
+             (sig-relation s)
+             (for/list ([r (sig-type s)]) (hash-ref relation->atoms r)))))
   ; Enforce domain restrictions: the domain of each relation must be
   ; contained in its given type.
   (define (fold-op t [op ->])

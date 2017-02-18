@@ -19,7 +19,7 @@
  unary-op?
  (struct-out prefab)
  ; lang/bounds.rkt
- make-bound make-exact make-upper
+ make-bound make-exact-bound make-upper-bound make-product-bound
  (struct-out bounds)
  get-upper-bound bounds-union bounds-variables
  ; lang/sketch.rkt

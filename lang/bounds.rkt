@@ -19,11 +19,14 @@
       (raise-arguments-error 'make-bound "bounds must contain tuples" "upper" t)))
   (bound relation lower upper))
 
-(define (make-exact relation contents)
+(define (make-exact-bound relation contents)
   (make-bound relation contents contents))
 
-(define (make-upper relation contents)
+(define (make-upper-bound relation contents)
   (make-bound relation '() contents))
+
+(define (make-product-bound relation col1 . columns)
+  (make-bound relation '() (apply cartesian-product col1 columns)))
 
 ; Get the upper bound for a relation r in a bounds? object
 (define (get-upper-bound bnds r)

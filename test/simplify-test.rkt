@@ -29,7 +29,7 @@
   (define arity (relation-arity relation))
   (define contents
     (apply cartesian-product (make-list arity (universe-atoms U))))
-  (make-upper relation contents))
+  (make-upper-bound relation contents))
 (define bnds
   (bounds U (for/list ([r terminals] #:unless (ast/node/expr/constant? r))
               (make-top r))))
