@@ -32,7 +32,7 @@ before_install:
 - cat ~/travis-racket/install-racket.sh | bash # pipe to bash not sh!
 - export PATH="${RACKET_DIR}/bin:${PATH}" #install-racket.sh can't set for us
 - git clone https://github.com/msoos/cryptominisat.git ~/cryptominisat
-- apt-get install -y --force-yes cmake
+# - apt-get install -y --force-yes cmake
 - (cd ~/cryptominisat && cmake . && make)
 - cp ~/cryptominisat/lib/libcryptominisat5.so solver/
 
