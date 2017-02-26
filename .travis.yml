@@ -2,8 +2,8 @@ language: c
 
 # Based from: https://github.com/greghendershott/travis-racket
 
-# Optional: Remove to use Travis CI's older infrastructure.
 sudo: false
+dist: trusty  # need modern cmake
 
 env:
   global:
