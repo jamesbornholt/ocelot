@@ -2,6 +2,7 @@
 
 (require racket/runtime-path
          ffi/unsafe ffi/unsafe/define ffi/unsafe/cvector
+         rackunit
          "solver.rkt")
 (provide make-cmsat-solver (all-from-out "solver.rkt"))
 
@@ -38,17 +39,21 @@
 ; CMS_DLL_PUBLIC bool cmsat_add_clause(SATSolver* self, const c_Lit* lits, size_t num_lits) NOEXCEPT;
 (define-cmsat cmsat_add_clause (_fun _SATSolver* _pointer _size -> _stdbool))
 ; CMS_DLL_PUBLIC bool cmsat_add_xor_clause(SATSolver* self, const unsigned* vars, size_t num_vars, bool rhs) NOEXCEPT;
+(define-cmsat cmsat_add_xor_clause (_fun _SATSolver* _pointer _size _stdbool -> _stdbool))
 ; CMS_DLL_PUBLIC void cmsat_new_vars(SATSolver* self, const size_t n) NOEXCEPT;
 (define-cmsat cmsat_new_vars (_fun _SATSolver* _size -> _void))
 
 ; CMS_DLL_PUBLIC c_lbool cmsat_solve(SATSolver* self) NOEXCEPT;
 (define-cmsat cmsat_solve (_fun _SATSolver* -> _lbool))
 ; CMS_DLL_PUBLIC c_lbool cmsat_solve_with_assumptions(SATSolver* self, const c_Lit* assumptions, size_t num_assumptions) NOEXCEPT;
+(define-cmsat cmsat_solve_with_assumptions (_fun _SATSolver* _pointer _size -> _lbool))
 ; CMS_DLL_PUBLIC slice_lbool cmsat_get_model(const SATSolver* self) NOEXCEPT;
 (define-cmsat cmsat_get_model (_fun _SATSolver* -> _slice_lbool))
 ; CMS_DLL_PUBLIC slice_Lit cmsat_get_conflict(const SATSolver* self) NOEXCEPT;
+(define-cmsat cmsat_get_conflict (_fun _SATSolver* -> _slice_Lit))
 
 ; CMS_DLL_PUBLIC void cmsat_set_num_threads(SATSolver* self, unsigned n) NOEXCEPT;
+(define-cmsat cmsat_set_num_threads (_fun _SATSolver* _uint -> _void))
 
 (define (new_lit var neg)
   (make-Lit (bitwise-ior (arithmetic-shift var 1) (if neg 1 0))))
@@ -78,7 +83,9 @@
        (set-cmsat-model! self (cmsat_get_model (cmsat-solver self))))
      (unless (and (> var 0) (<= var (slice_lbool-num_vals (cmsat-model self))))
        (raise-argument-error 'get-value (format "index in [1,~v]" (slice_lbool-num_vals (cmsat-model self))) var))
-     (equal? (lbool-x (ptr-ref (slice_lbool-vals (cmsat-model self)) _lbool (sub1 var))) L_TRUE))])
+     (equal? (lbool-x (ptr-ref (slice_lbool-vals (cmsat-model self)) _lbool (sub1 var))) L_TRUE))
+   (define (shutdown self)
+     (cmsat_free (cmsat-solver self)))])
 
 (define (make-cmsat-solver [vars 0])
   (define solver (cmsat_new))
@@ -86,52 +93,28 @@
     (cmsat_new_vars solver vars))
   (cmsat solver vars (make-cvector _Lit 100) #f))
 
-#|
-(define solver (make-cmsat-solver 3))
-(assert-clause solver '(1))
-(assert-clause solver '(-2))
-(assert-clause solver '(-1 2 3))
-(solve solver)
-(get-value solver 1)
-(get-value solver 2)
-(get-value solver 3)
-|#
+(module+ test
+  (define s1 (make-cmsat-solver 3))
+  (assert-clause s1 '(1))
+  (assert-clause s1 '(-2))
+  (assert-clause s1 '(-1 2 3))
+  (check-true (solve s1))
+  (check-true (get-value s1 1))
+  (check-false (get-value s1 2))
+  (check-true (get-value s1 3))
+  (assert-clause s1 '(-3))
+  (check-false (solve s1))
+  (shutdown s1)
 
-#|
-(define solver (make-cmsat-solver 0))
-(assert-clause solver '(1))
-(assert-clause solver '(-2))
-(assert-clause solver '(-1 2 3))
-(solve solver)
-(get-value solver 1)
-(get-value solver 2)
-(get-value solver 3)
-(assert-clause solver '(-3))
-(solve solver)
-|#
-
-#|
-(define solver (cmsat_new))
-(cmsat_new_vars solver 3)
-
-(define clause (malloc 'raw _Lit 4))
-(ptr-set! clause _Lit 0 (new_lit 0 #f))
-(cmsat_add_clause solver clause 1)
-
-(ptr-set! clause _Lit 0 (new_lit 1 #t))
-(cmsat_add_clause solver clause 1)
-
-(ptr-set! clause _Lit 0 (new_lit 0 #t))
-(ptr-set! clause _Lit 1 (new_lit 1 #f))
-(ptr-set! clause _Lit 2 (new_lit 2 #f))
-(cmsat_add_clause solver clause 3)
-
-(define ret (cmsat_solve solver))
-(lbool-x ret)
-
-(define model (cmsat_get_model solver))
-(slice_lbool-num_vals model)
-(lbool-x (ptr-ref (slice_lbool-vals model) _lbool 0))
-(lbool-x (ptr-ref (slice_lbool-vals model) _lbool 1))
-(lbool-x (ptr-ref (slice_lbool-vals model) _lbool 2))
-|#
+  (define s2 (make-cmsat-solver))
+  (assert-clause s2 '(1))
+  (assert-clause s2 '(-2))
+  (assert-clause s2 '(-1 2 3))
+  (check-true (solve s2))
+  (check-true (get-value s2 1))
+  (check-false (get-value s2 2))
+  (check-true (get-value s2 3))
+  (assert-clause s2 '(-3))
+  (check-false (solve s2))
+  (shutdown s2)
+  )

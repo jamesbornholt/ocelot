@@ -10,13 +10,14 @@
   [(define/generic assert-cnf assert-clause)
    (define/generic solve-cnf solve)
    (define/generic get-value-cnf get-value)
+   (define/generic shutdown-cnf shutdown)
    (define (assert-clause self cl)
      (match-define (cnf-solver solver var->const cache) self)
      (define (fresh [var (gensym)]) ; get a fresh 1-indexed CNF var
        (hash-set! var->const var (add1 (hash-count var->const)))
        (hash-ref var->const var))
      (define new-clauses '())
-     (define (rec F)
+     (define (rec F [neg? #f])
        (hash-ref!
         cache
         F
@@ -24,14 +25,14 @@
          (match F
            [(expression (== @!) f1)
             (define a (fresh))
-            (define a_f1 (rec f1))
+            (define a_f1 (rec f1 #t))
             (set! new-clauses (append (list (list a a_f1) (list (- a) (- a_f1))) new-clauses))
             a]
-           [(expression (== <=>) a b)
-            (rec (&& (|| (! a) b) (|| (! b) a)))]
+           [(expression (== <=>) f1 f2)
+            (rec (&& (|| (! f1) f2) (|| (! f2) f1)) neg?)]
            [(expression op fns ...)
             (define a (fresh))
-            (define a_fns (map rec fns))
+            (define a_fns (for/list ([f fns]) (rec f neg?)))
             (define-values (a->a_fns a_fns->a)
               (match op
                 [(== @&&) (values (for/list ([x a_fns]) (list (- a) x))
@@ -64,7 +65,9 @@
      (if ret
          (sat (for/hash ([(v i) var->const] #:when (constant? v))
                 (values v (get-value-cnf solver i))))
-         (unsat)))])
+         (unsat)))
+   (define (shutdown self)
+     (shutdown-cnf (cnf-solver-solver self)))])
 
 (define (make-cnf-solver [make-sat-solver make-cmsat-solver])
   (cnf-solver (make-sat-solver) (make-hash) (make-hash)))
@@ -78,8 +81,10 @@
   (check-true (sat? (solve s)))
   (assert-clause s (! b))
   (check-false (sat? (solve s)))
+  (shutdown s)
   (define s1 (make-cnf-solver))
   (assert-clause s1 #t)
   (check-true (sat? (solve s1)))
   (assert-clause s1 #f)
-  (check-false (sat? (solve s1))))
+  (check-false (sat? (solve s1)))
+  (shutdown s1))

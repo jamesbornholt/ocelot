@@ -6,4 +6,5 @@
 (define-generics solver
   (assert-clause solver clause)
   (solve solver)
-  (get-value solver var))
+  (get-value solver var)
+  (shutdown solver))
