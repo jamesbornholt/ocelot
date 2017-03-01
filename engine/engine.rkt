@@ -130,23 +130,20 @@
 ; f: the predicate
 (define (interpret-quantifier universe relations quantifier decls f cache)
   (define usize (universe-size universe))
-  (define (evaluate-quantifier op iden conn)
+  (define (evaluate-quantifier op conn)
     (define (rec decls)
       (if (null? decls)
           (interpret-rec f universe relations (and cache (hash-copy cache)))
           (match-let ([(cons v r) (car decls)])
-            (apply op (for/list ([i usize][val (matrix-entries r)])
-                          (if ($false? val)
-                              iden
-                              (begin
-                                (hash-set! relations v (singleton-matrix universe i))
-                                (begin0
-                                  (conn val (rec (cdr decls)))
-                                  (hash-remove! relations v)))))))))
+            (apply op (for/list ([i usize][val (matrix-entries r)] #:unless ($false? val))
+                        (hash-set! relations v (singleton-matrix universe i))
+                        (begin0
+                          (conn val (rec (cdr decls)))
+                          (hash-remove! relations v)))))))
     (rec decls))
   (case quantifier
-    ['all  (evaluate-quantifier && #t =>)]
-    ['some (evaluate-quantifier || #f &&)]))
+    ['all  (evaluate-quantifier && =>)]
+    ['some (evaluate-quantifier || &&)]))
 
 
 (define (interpret-multiplicity universe mult expr)

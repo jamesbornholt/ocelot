@@ -30,18 +30,20 @@
            [arity ($+ arityA arityB -2)]
            [size ($expt univSize arity)]
            [sizeB ($expt univSize arityB)]
-           [c ($quotient sizeB univSize)])
+           [c ($quotient sizeB univSize)]
+           [vB (list->vector B)])
       (define res ($make-vector size #f))
       (for ([(iVal i) (in-indexed A)] #:unless ($false? iVal))
         (let* ([rowHead ($* ($remainder i univSize) c)]
                [rowTail ($+ rowHead c)]
-               [rowStart ($list-tail B rowHead)]
                [base ($quotient i univSize)])
-          (for ([j (in-range rowHead rowTail)][b rowStart] #:unless ($false? b))
-            (let ([retVal (&& iVal b)])
-              (unless ($false? retVal)
-                (let ([k ($+ ($* base c) ($remainder j c))])
-                  ($vector-set! res k (|| ($vector-ref res k) retVal))))))))
+          (for ([j (in-range rowHead rowTail)])
+            (let ([b (vector-ref vB j)])
+              (unless ($false? b)
+                (let ([retVal (&& iVal b)])
+                  (unless ($false? retVal)
+                    (let ([k ($+ ($* base c) ($remainder j c))])
+                      ($vector-set! res k (|| ($vector-ref res k) retVal))))))))))
       (matrix ($vector->list res)))))
 
 (define (matrix/cross universe A B)
