@@ -27,3 +27,8 @@ script:
 
 after_success:
  - raco setup --check-pkg-deps --pkgs ocelot
+
+
+notifications:
+  slack:
+    secure: FGrKO3+Lwwfbfd3nHrXZ+3V1FzVSpHYazjjrXhpR55PDlHYfMFJSRu6y3Bgk3/EOoceKnGFBHrB/n5T9M0fe5mjur8z9s9/drmoVb3lKdS0YqhYU8m/dknkTq+RMsFopYo9a8RrZcEWY+WdrDe/ZMXfqs9fBG0ev3jfoJdQA5671KjYsln+pNMpgL9yZBrw2+ajOiLUdeDxIeLryhNXgjA9HA1Th5DsaVga8qSUGAvkkIF3Ex+kW5gK+ZqdLa0G4zoFv1yXXQc8DtKmxrNPd4l6ucrLjqLsVvdotrhH0ot4QCrAdAMswXzJsWPXnFhF6qlUTxhulXKEL9PzpRkrExqm7TziXRQCEAbL+CIOYrnXja2OTPn1SDZFC176winU3qMfQKm79wkosRJx6hNQ3WegwKhX6lF7VvgvggwYt8pn/QaVzjCXX8wE7KBG5QOnacml/OQ/1yMrqZJtzPTsrklJBwWlLcICxqg345inTGTra9nZuu9eI+mDGLBMP5nVEmsKM21gt4F1dV7yXqyyf63TqnpuZRk+sUR+yx9lBUAOqiVSe0z5GelhUoM+0e+9FMLReyaW91+b12U18tOAv4QlHGcR3gI/WTlabW+3nnDg622eZvfr8Sjsbv+cYuqXysXnvHnR7CbLiopjAPacITAAU4/NkCyfDmYS4F+d+Jb8=
