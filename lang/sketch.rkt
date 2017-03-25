@@ -9,7 +9,8 @@
 ; the non-terminal operators, and the terminal relations in the grammar.
 ; Optionally, a maximum arity can be chosen for expressions in the grammar,
 ; and the num-joins parameter controls how many nested joins are allowed.
-(define (expression-sketch depth arity ops terminals [max-arity 3] [num-joins 1])
+(define (expression-sketch depth arity ops terminals [max-arity 3] [num-joins 1]
+                           #:balanced? [balanced? #t])
   ; ops must contain some way of producing identity expressions so that the
   ; grammar includes all exprs *up to* the given depth.
   (unless (or (member ast/& ops) (member ast/+ ops))
@@ -42,7 +43,10 @@
                                    expr)])))))
                   (values (append terms (if (for/or ([e subexprs]) ($false? e)) '() (list (apply op subexprs))))
                           cache))))
-            terms)))
+            (append terms
+                    (if balanced?
+                        '()
+                        (filter (λ (e) (equal? (ast/relation-arity e) arity)) terminals))))))
     ; if there are no subexprs at this level, return #f
     ; (checked by all-subexprs-exist?)
     (if (null? exprs)
