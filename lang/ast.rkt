@@ -264,7 +264,7 @@
      (fprintf port "(~a ~a)" mult expr))])
 (define (multiplicity-formula mult expr)
   (unless (node/expr? expr)
-    (raise-arguments-error mult "expr?" expr))
+    (raise-argument-error mult "expr?" expr))
   (node/formula/multiplicity mult expr))
 
 (define-syntax (all stx)
