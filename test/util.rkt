@@ -63,6 +63,18 @@
             (define F* (interpret F bnds))
             (check-equal? F* result)))))]))
 
+(define-syntax (test-matrix stx)
+  (syntax-case stx ()
+    [(_ U E [(r1 v1) ...] pred)
+     (let ([loc (syntax->location stx)])
+       (quasisyntax/loc stx
+         (with-check-info* (list (make-check-location '#,loc))
+           (thunk
+            (define lbnds (list (make-exact-bound r1 v1) ...))
+            (define bnds (bounds U lbnds))
+            (define E* (interpret E bnds))
+            (pred E*)))))]))
+
 (define-for-syntax (syntax->location stx)
   (list (syntax-source stx)
         (syntax-line stx)

@@ -111,3 +111,13 @@
 (define (matrix/some? universe A)
   (for/all ([A (matrix-entries A)])
     (apply || A)))
+
+; does A contain a given tuple?
+(define (matrix/contains? universe tuple A)
+  (for/all ([A (matrix-entries A)])
+    (let ([arity (matrix-arity universe A)])
+      (unless (= arity (length tuple))
+        (raise-argument-error 'matrix/contains? "tuple of correct length" tuple))
+      (let ([idx (tuple->idx universe tuple)])
+        (list-ref A idx)))))
+

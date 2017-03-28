@@ -1,6 +1,7 @@
 #lang racket
 
 (require "../ocelot.rkt" "util.rkt"
+         (only-in "../engine/matrix-ops.rkt" matrix/contains?)
          rackunit rackunit/text-ui)
 
 (define U (universe '(a b c d)))
@@ -419,6 +420,16 @@
      (test-formula U F4 [(A2 '())] #f)))
   )
 
+(define (test-contains?)
+  (define E1 A2)
+  (test-matrix U E1 [(A2 '((a b) (c c) (c d)))]
+               (lambda (m) (check-false (matrix/contains? U '(a a) m))))
+  (test-matrix U E1 [(A2 '((a b) (c c) (c d)))]
+               (lambda (m) (check-true (matrix/contains? U '(a b) m))))
+  (test-matrix U E1 [(A2 '((a b) (c c) (c d)))]
+               (lambda (m) (check-true (matrix/contains? U '(c c) m))))
+  )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -457,6 +468,13 @@
    (test-one)
    (test-lone)))
 
+(define matrix-tests
+  (test-suite
+   "matrix tests"
+   #:before (thunk (printf "----- matrix tests -----\n"))
+   (test-contains?)))
+
 (module+ test
   (time (run-tests expression-tests))
-  (time (run-tests formula-tests)))
+  (time (run-tests formula-tests))
+  (time (run-tests matrix-tests)))
