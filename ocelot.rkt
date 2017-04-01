@@ -2,7 +2,7 @@
 
 (require "lang/ast.rkt" "lang/bounds.rkt" "lang/sketch.rkt" "lang/universe.rkt"
          "engine/engine.rkt" "engine/interpretation.rkt"
-         "lib/print.rkt" "lib/simplify.rkt")
+         "lib/print.rkt" "lib/simplify.rkt" "lib/simplify-solve.rkt")
 
 (provide
  ; lang/ast.rkt
@@ -33,5 +33,5 @@
  ; lib/print.rkt
  ast->datum ast->alloy
  ; lib/simplify.rkt
- simplify
+ simplify simplify/solve
  )

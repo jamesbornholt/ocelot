@@ -32,7 +32,7 @@
      (define a* (for/fold ([a accum*]) ([c (map cdr decls)]) (walk-expr c proc a)))
      (walk-expr formula proc a*)]
     [(ast/node/formula/multiplicity _ expr)
-     (walk-expr expr proc)]
+     (walk-expr expr proc accum*)]
     [_ accum*]))))
 
 
@@ -52,12 +52,30 @@
                      (set-add accum e)
                      accum))
                (set)))
+  ; also find relations mentioned in the constraints, which will need to be
+  ; bound (though will not be available in the synthesized expression)
+  (define relations*
+    (walk-expr constraints
+               (lambda (e accum)
+                 (if (ast/node/expr/relation? e)
+                     (set-add accum e)
+                     accum))
+               (set)))
+
+  ; shortcut: use any joins in the expression as terminals in the sketch
+  (define joins
+    (walk-expr expr
+               (lambda (e accum)
+                 (if (ast/node/expr/op/join? e)
+                     (set-add accum e)
+                     accum))
+               (set)))
 
   ; instantiate all those relations
   (define atoms (build-list usize values))
   (define U (universe atoms))
   (define bnds
-    (bounds U (for/list ([r relations])
+    (bounds U (for/list ([r (set-union relations relations*)])
                 (apply make-product-bound r (make-list (ast/relation-arity r) atoms)))))
   (define interp (instantiate-bounds bnds))
 
@@ -70,6 +88,7 @@
     (define sketch (expression-sketch depth arity
                                       (list ast/+ ast/- ast/& ast/->)
                                       (append (set->list relations)
+                                              (set->list joins)
                                               (list ast/none ast/univ ast/iden))
                                       #:balanced? #f))
     (define cost (ast-cost sketch))
@@ -86,7 +105,9 @@
              (solver-assert solver (list (< cost c*)))
              (inner sol)]
             [(unsat? s)
+             (solver-shutdown solver)
              (if (> depth 6)
                  expr
                  (outer (add1 depth)))]
-            [else (evaluate sketch s)]))))
+            [else (solver-shutdown solver)
+                  (evaluate sketch s)]))))
