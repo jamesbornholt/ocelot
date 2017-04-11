@@ -17,8 +17,8 @@ Ocelot's synthesis support is the key to our [MemSynth](http://memsynth.uwplse.o
 for synthesizing memory consistency model specifications.
 
 Ocelot is developed at the [University of Washington](http://cs.washington.edu)
-by [James Bornholt](http://homes.cs.washington.edu/~bornholt/)
-and [Emina Torlak](http://homes.cs.washington.edu/~emina/).
+by [James Bornholt](https://homes.cs.washington.edu/~bornholt/)
+and [Emina Torlak](https://homes.cs.washington.edu/~emina/).
 
 ### Getting started
 
@@ -26,7 +26,7 @@ Ocelot is available through the [Racket](https://racket-lang.org) package manage
 
     raco pkg install ocelot
 
-The [documentation](#) provides a quick start guide to constructing Ocelot programs.
+The [documentation](https://docs.racket-lang.org/ocelot/) provides a quick start guide to constructing Ocelot programs.
 Ocelot is similar to [Alloy](http://alloy.mit.edu),
 and so many of the principles and examples from that language
 will translate well.
