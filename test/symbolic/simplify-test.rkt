@@ -1,12 +1,9 @@
 #lang rosette
 
 (require racket/hash rackunit rackunit/text-ui
-         "util.rkt" 
-         (prefix-in ast/ "../lang/ast.rkt") 
-         (only-in "../lang/ast.rkt" relation-arity)
-         "../lang/bounds.rkt" "../lang/universe.rkt"
-         "../engine/engine.rkt" "../engine/interpretation.rkt"
-         "../lib/simplify.rkt"  "../lib/print.rkt")
+         "../util.rkt"
+         ocelot
+         (prefix-in ast/ ocelot/lang/ast))
 
 (file-stream-buffer-mode (current-output-port) 'none)
 
@@ -26,7 +23,7 @@
 ; variables for their contents immediately
 (define U (universe '(1 2 3 4)))
 (define (make-top relation)
-  (define arity (relation-arity relation))
+  (define arity (ast/relation-arity relation))
   (define contents
     (apply cartesian-product (make-list arity (universe-atoms U))))
   (make-upper-bound relation contents))

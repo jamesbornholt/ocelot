@@ -1,6 +1,6 @@
 #lang racket
 
-(require rackunit "../lang/ast.rkt" "../lib/simplify-solve.rkt")
+(require rackunit ocelot/lang/ast ocelot/lib/simplify-solve)
 
 
 ; Some memory model relations that have rich type information:

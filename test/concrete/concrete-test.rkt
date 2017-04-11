@@ -1,7 +1,7 @@
 #lang racket
 
-(require "../ocelot.rkt" "util.rkt"
-         (only-in "../engine/matrix-ops.rkt" matrix/contains?)
+(require ocelot "../util.rkt"
+         (only-in "../../engine/matrix-ops.rkt" matrix/contains?)
          rackunit rackunit/text-ui)
 
 (define U (universe '(a b c d)))

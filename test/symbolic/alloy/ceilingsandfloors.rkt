@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../../ocelot.rkt" "../../lib/alloy.rkt" rackunit)
+(require ocelot ocelot/lib/alloy rackunit)
 
 ; This file implements the ceilingsAndFloors.als Alloy demo
 ; (found in Alloy's sample models under examples/toys/).

@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../../lib/alloy.rkt")
+(require ocelot/lib/alloy)
 
 (define (clear!)
   (clear-alloy!)
