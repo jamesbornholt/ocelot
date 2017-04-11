@@ -2,6 +2,7 @@
 (define collection "ocelot")
 (define deps '("base"
                "rackunit-lib"
+               "sandbox-lib"
                "rosette"))
 (define build-deps '("scribble-lib" "racket-doc"))
 (define scribblings '(("scribblings/ocelot.scrbl" () (experimental))))
