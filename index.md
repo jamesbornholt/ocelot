@@ -9,9 +9,12 @@ title: Ocelot
 
 Ocelot provides an embedding of relational logic (like [Alloy](http://alloy.mit.edu))
 in the [Rosette](http://emina.github.io/rosette/) solver-aided programming language.
-The embedded allows both solving and verification of relational specifications,
+The embedding allows both solving and verification of relational specifications,
 as well as *synthesis* of relational specifications,
 and integration with other Rosette constraints.
+
+Ocelot's synthesis support is the key to our [MemSynth](http://memsynth.uwplse.org) project
+for synthesizing memory consistency model specifications.
 
 Ocelot is developed at the [University of Washington](http://cs.washington.edu)
 by [James Bornholt](http://homes.cs.washington.edu/~bornholt/)
@@ -23,7 +26,7 @@ Ocelot is available through the [Racket](https://racket-lang.org) package manage
 
     raco pkg install ocelot
 
-The [documentation](#) contains a quick start guide to constructing Ocelot programs.
+The [documentation](#) provides a quick start guide to constructing Ocelot programs.
 Ocelot is similar to [Alloy](http://alloy.mit.edu),
 and so many of the principles and examples from that language
 will translate well.
