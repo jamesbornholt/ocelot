@@ -15,7 +15,7 @@
   (define (rec bnd)
     (if (<= bnd 0)
         (apply choose* terminals)
-        (begin
+        (let ()
           (define e0 (rec (sub1 bnd)))
           (define e1 (rec (sub1 bnd)))
           (define-symbolic* xi boolean? [(length ops)])

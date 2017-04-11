@@ -1,9 +1,14 @@
 #lang scribble/manual
 
-@require[scribble/eval @for-label[ocelot (only-in rosette term?)]]
+@require[racket/runtime-path racket/require racket/sandbox scribble/eval
+         "log.rkt"
+         @for-label[ocelot
+                   (only-in rosette term? solve)
+                   (only-in rosette/base/core/safe assert)]]
 
-@(define my-eval (make-base-eval #:lang 'racket))
-@(my-eval `(require rosette ocelot))
+@(define-runtime-path root ".")
+@(define my-eval (make-log-evaluator (logfile root) 'rosette))
+@(my-eval `(require ocelot))
 
 @title{Ocelot: a solver for relational logic}
 @author[(author+email "James Bornholt" "bornholt@cs.washington.edu")]
@@ -405,14 +410,16 @@ back to the relations that defined the solved formula.
   (define bCats (make-upper-bound cats '((a) (b) (c) (d))))
   (define allCatBounds (bounds U (list bCats)))
   (define iCats (instantiate-bounds allCatBounds))
-  iCats
+
   (code:comment @#,elem{Find an interesting model for the cats relation})
   (define F (and (some cats) (some (- univ cats))))
   (define resultCats (solve (assert (interpret* F iCats))))
   (sat? resultCats)
+
   (code:comment @#,elem{Lift the model to lists of tuples for each relation})
   (define catsModel (interpretation->relations (evaluate iCats resultCats)))
   (hash-ref catsModel cats)
   ]
 
   
+@(kill-evaluator my-eval)

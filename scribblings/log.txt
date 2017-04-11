@@ -1,0 +1,105 @@
+;; This file was created by make-log-based-eval
+((require ocelot) ((3) 0 () 0 () () (c values c (void))) #"" #"")
+((define U (universe '(a b c d)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((universe-atoms U) ((3) 0 () 0 () () (q values (a b c d))) #"" #"")
+((define File (declare-relation 1 "File"))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define Dir (declare-relation 1 "Dir"))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define contents (declare-relation 2 "contents"))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+(contents
+ ((3)
+  1
+  (((lib "ocelot/scribblings/log.rkt") . deserialize-info:opaque-v0))
+  0
+  ()
+  ()
+  (c values c (0 (u . "(relation 2 \"contents\")"))))
+ #""
+ #"")
+((define DirsAndFiles (+ File Dir))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define nonEmptyDir (some (join Dir contents)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define acyclic (no ((d Dir)) (in d (join d (^ contents)))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define bDir (make-exact-bound Dir '((a))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define bFile (make-bound File '((b)) '((b) (c) (d))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define bContents (make-product-bound contents '(a b c d) '(a b c d)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define allBounds (bounds U (list bDir bFile bContents)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define formula1 (interpret nonEmptyDir allBounds))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define result1 (solve (assert formula1)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((sat? result1) ((3) 0 () 0 () () (q values #t)) #"" #"")
+((define formula2 (interpret acyclic allBounds))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define result2 (verify (assert formula2)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((sat? result2) ((3) 0 () 0 () () (q values #t)) #"" #"")
+((define cats (declare-relation 1 "cats"))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define bCats (make-upper-bound cats '((a) (b) (c) (d))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define allCatBounds (bounds U (list bCats)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define iCats (instantiate-bounds allCatBounds))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define F (and (some cats) (some (- univ cats))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((define resultCats (solve (assert (interpret* F iCats))))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((sat? resultCats) ((3) 0 () 0 () () (q values #t)) #"" #"")
+((define catsModel (interpretation->relations (evaluate iCats resultCats)))
+ ((3) 0 () 0 () () (c values c (void)))
+ #""
+ #"")
+((hash-ref catsModel cats) ((3) 0 () 0 () () (q values ((b)))) #"" #"")
