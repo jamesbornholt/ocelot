@@ -110,9 +110,11 @@ while verifying the constraints with @racket[verify] is similar to Alloy's @tt{c
   (sat? result2)
   ]
 
+@;{
 @subsection[#:tag "sketch"]{Synthesizing Relational Expressions}
 
 TODO
+}
 
 @section{Reference}
 
@@ -421,5 +423,17 @@ back to the relations that defined the solved formula.
   (hash-ref catsModel cats)
   ]
 
+@subsection[#:tag "sketch"]{Sketching and Synthesis}
+
+@defproc[(expression-sketch [depth natural-number/c]
+                            [arity natural-number/c]
+                            [operators (listof procedure?)]
+                            [terminals (listof node/expr?)]) node/expr?]{
+  Constructs an expression sketch, which is an unknown relational expression.
+  Possible completions of the expression sketch are all relational expressions
+  of arity @racket[arity] whose AST is @racket[depth] levels deep,
+  with leaf nodes drawn from @racket[terminals]
+  and non-leaf nodes drawn from @racket[operators].
+}
   
 @(kill-evaluator my-eval)
