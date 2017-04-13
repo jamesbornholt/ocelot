@@ -15,17 +15,29 @@
 
 @defmodule[ocelot]
 
-Ocelot provides an embedding of relational logic in 
+Ocelot provides an embedding of bounded relational logic in 
 @link["https://emina.github.io/rosette"]{Rosette},
 a solver-aided programming language.
 Ocelot enables both @(seclink "check" "verification")
 and @(seclink "sketch" "synthesis") of relational logic expressions.
 
+Ocelot's flavor of bounded relational logic draws heavily on
+@link["http://alloy.mit.edu/"]{Alloy},
+so many concepts and examples from Alloy will also help
+in developing Ocelot programs.
+
 @section{Quick Start}
+
+Ocelot is best used with @link["https://emina.github.io/rosette"]{Rosette},
+so your file should begin:
+
+@codeblock|{
+  #lang rosette
+}|
 
 Using Ocelot involves first @seclink["spec"]{constructing a relational specification},
 then @seclink["scope"]{defining a scope} in which to check the specification,
-and finally @seclink["check"]{checking properties within that scope}.
+and finally @seclink["check"]{checking properties} within that scope.
 
 @subsection[#:tag "spec"]{Constructing relational specifications}
 
