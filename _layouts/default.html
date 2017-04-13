@@ -5,6 +5,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="{{ page.title }}" />
+<meta property="og:description" content="{{ page.summary | default: page.content | markdownify | strip_html | strip_newlines | xml_escape | truncate: 200 }}" />
+<meta property="og:image" content="{{ site.baseurl }}/img/ocelot.jpg" />
+
 <link rel="stylesheet" href="{{ site.baseurl }}/css/pure-min.css">
 <link rel="stylesheet" href="{{ site.baseurl }}/css/typebase.css">
 <link rel="stylesheet" href="{{ site.baseurl }}/css/custom.css">

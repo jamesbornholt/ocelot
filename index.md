@@ -1,5 +1,6 @@
 ---
 title: Ocelot
+summary: Ocelot is an embedding of relational logic (like Alloy) in the Rosette solver-aided langage.
 ---
 
 # Ocelot
