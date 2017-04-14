@@ -161,7 +161,7 @@ context will not also be manipulating Rosette expressions.
 @defproc[(- [a node/expr?] [b node/expr?] ...) node/expr?]{
  Produces the first relation, but without any tuples present in the remaining relations (i.e., set difference).
  
- @racket[(- a b c)] is equivalent to @racket[((- a b) c)].}
+ @racket[(- a b c)] is equivalent to @racket[(- (- a b) c)].}
 
 @defproc[(-> [a node/expr?] [b node/expr?] ...) node/expr?]{
   Produces the cross product of two or more relations.}
