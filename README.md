@@ -10,11 +10,11 @@ and synthesis of relational logic expressions.
 
 ## Installation
 
-### With a Package
+### From the Racket package server
 
-Run
+Run:
 
-    rack pkg install ocelot
+    raco pkg install ocelot
     
 ### From Source
 
