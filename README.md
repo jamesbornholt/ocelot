@@ -10,6 +10,14 @@ and synthesis of relational logic expressions.
 
 ## Installation
 
+### From the Racket package server
+
+Run:
+
+    raco pkg install ocelot
+    
+### From Source
+
 Clone this respository, enter its directory, and run:
 
     raco pkg install
