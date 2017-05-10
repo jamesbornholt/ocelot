@@ -1,7 +1,7 @@
 #lang rosette
 
 (require ocelot "../util.rkt"
-         rosette/lib/angelic
+         rosette/lib/angelic rosette/lib/synthax
          rackunit rackunit/text-ui)
 
 (define U (universe '(a b c d)))
@@ -60,13 +60,24 @@
   (test-formula-solve U (= Y B1) [(A1 '((a))) (B1 '((b)))] #t)
   )
 
+(define (test-sketch-under-comprehension)
+  (define E1 (set ([a A1]) (choose (in a B1) (in a C1))))
+
+  (test-formula-solve U (= E1 A1) [(A1 '((a) (b))) (B1 '()) (C1 '((a) (b)))] #t)
+  (test-formula-solve U (= E1 A1) [(A1 '((a) (b))) (B1 '()) (C1 '((a)))] #f)
+  (test-formula-solve U (= E1 A1) [(A1 '((a) (b))) (B1 '((a) (b))) (C1 '((a) (b)))] #t)
+  (test-formula-solve U (= E1 A1) [(A1 '((a))) (B1 '((a) (b))) (C1 '((a)))] #t)
+  )
+
+
 (define solve-tests
   (test-suite
    "solve tests"
    #:before (thunk (printf "----- solve tests -----\n"))
    (test-+)
    (test-combo)
-   (test-caching)))
+   (test-caching)
+   (test-sketch-under-comprehension)))
 
 (module+ test
   (time (run-tests solve-tests)))
