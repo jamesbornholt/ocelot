@@ -1,6 +1,6 @@
 #lang rosette
 
-(require racket/hash rackunit rackunit/text-ui
+(require racket/hash rackunit
          "../util.rkt"
          ocelot
          (prefix-in ast/ ocelot/lang/ast))
