@@ -146,17 +146,7 @@
 
 ;; -- relations ----------------------------------------------------------------
 
-(struct node/expr/relation node/expr (name)
-  #:methods gen:equal+hash
-  [(define (equal-proc a b equal?-recur)
-     ($and (equal?-recur (node/expr-arity a) (node/expr-arity b))
-           (equal?-recur (node/expr/relation-name  a) (node/expr/relation-name b))))
-   (define (hash-proc a hash-recur)
-     ($+ (hash-recur (node/expr/relation-name a))
-         (hash-recur (node/expr-arity a))))
-   (define (hash2-proc a hash2-recur)
-     ($+ (hash2-recur (node/expr/relation-name a))
-         (hash2-recur (node/expr-arity a))))]
+(struct node/expr/relation node/expr (name) #:transparent #:mutable
   #:methods gen:custom-write
   [(define (write-proc self port mode)
      (match-define (node/expr/relation arity name) self)

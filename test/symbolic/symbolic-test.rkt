@@ -69,6 +69,16 @@
   (test-formula-solve U (= E1 A1) [(A1 '((a))) (B1 '((a) (b))) (C1 '((a)))] #t)
   )
 
+(define (test-eval)
+  ; Ocelot depends on equality being preserved across evaluate; if this doesn't
+  ; hold, then evaluation can be messed up
+  (define-symbolic p boolean?)
+
+  (define F (if p A1 B1))
+  (define model (solve (assert p)))
+  (check-true (equal? (evaluate F model) A1))
+  )
+
 
 (define solve-tests
   (test-suite
@@ -77,7 +87,8 @@
    (test-+)
    (test-combo)
    (test-caching)
-   (test-sketch-under-comprehension)))
+   (test-sketch-under-comprehension)
+   (test-eval)))
 
 (module+ test
   (time (run-tests solve-tests)))
