@@ -26,12 +26,12 @@
           (begin
             (define-values (terms cache)
               (for*/fold ([terms '()][cache (hash)])
-                         ([op ops] #:unless (and (equal? op ast/join) (= num-joins 0))
-                          [args (possible-args op arity max-arity)])
+                         ([op (in-list ops)] #:unless (and (equal? op ast/join) (= num-joins 0))
+                          [args (in-list (possible-args op arity max-arity))])
                 (let ([num-joins-in-subexprs (- num-joins (if (equal? op ast/join) 1 0))])
                   (define subexprs
                     (let ([local-cache cache])  ; track which exprs have been used in this instantiation
-                      (for/list ([a args])
+                      (for/list ([a (in-list args)])
                         (let* ([key (cons num-joins-in-subexprs a)]
                                [exprs (hash-ref local-cache key '())])
                           (cond [(> (length exprs) 0)  ; an expression already exists
@@ -41,7 +41,7 @@
                                  (let ([expr (rec a (- bnd 1) num-joins-in-subexprs)])
                                    (set! cache (hash-set cache key (append (hash-ref cache key '()) (list expr))))
                                    expr)])))))
-                  (values (append terms (if (for/or ([e subexprs]) ($false? e)) '() (list (apply op subexprs))))
+                  (values (append terms (if (for/or ([e (in-list subexprs)]) ($false? e)) '() (list (apply op subexprs))))
                           cache))))
             (append terms
                     (if balanced?
@@ -95,9 +95,9 @@
 ;  a hash from arity to # of instances to instantiate
 (define (possible-subexprs ops arity [max-arity 3])
   (for*/fold ([nodes '()][subtrees (hash)])
-             ([op ops][args (possible-args op arity)])
+             ([op (in-list ops)][args (in-list (possible-args op arity))])
     (values (append nodes (list (cons op args)))
             (for/fold ([subtrees subtrees])
                       ([a args])
               (hash-set subtrees a (max (hash-ref subtrees a 0)
-                                        (for/sum ([b args]) (if (= a b) 1 0))))))))
+                                        (for/sum ([b (in-list args)]) (if (= a b) 1 0))))))))

@@ -18,9 +18,9 @@
                         (cdr tuple))]))))
 (define (idx->tuple universe arity idx)
   (define usize (universe-size universe))
-  (for/list ([i arity])
+  (for/list ([i (in-range arity)])
     (list-ref (universe-atoms universe)
               (remainder (quotient idx (expt usize (- arity i 1))) usize))))
 
 (define (singleton-matrix universe idx)
-  (matrix (for/list ([i (universe-size universe)]) (= i idx))))
+  (matrix (for/list ([i (in-range (universe-size universe))]) (= i idx))))

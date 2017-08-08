@@ -44,29 +44,29 @@
 (define (empty? t)
   (match t
     [(node/expr/op/+ arity args)
-     (for/and ([a args]) (empty? a))]
+     (for/and ([a (in-list args)]) (empty? a))]
     [(node/expr/op/- arity args)
-     (empty? (first args))]
+     (empty? (car args))]
     [(or (node/expr/op/& arity args)
          (node/expr/op/-> arity args)
          (node/expr/op/join arity args)
          (node/expr/op/<: arity args)
          (node/expr/op/:> arity args))
-     (for/or ([a args]) (empty? a))]
+     (for/or ([a (in-list args)]) (empty? a))]
     [(== ast/none) #t]
     [x #f]))
 (define (full? t)
   (match t
     [(node/expr/op/+ arity args)
-     (for/or ([a args]) (full? a))]
+     (for/or ([a (in-list args)]) (full? a))]
     [(node/expr/op/- arity args)
-     (for/and ([a (cdr args)]) (empty? a))]
+     (for/and ([a (in-list (cdr args))]) (empty? a))]
     [(or (node/expr/op/& arity args)
          (node/expr/op/-> arity args)
          (node/expr/op/join arity args)
          (node/expr/op/<: arity args)
          (node/expr/op/:> arity args))
-     (for/and ([a args]) (full? a))]
+     (for/and ([a (in-list args)]) (full? a))]
     [(== ast/univ) #t]
     [x #f]))
 (define (subset? a b)
@@ -78,7 +78,7 @@
                 [((node/expr/op/& arity args) b)
                  (if (member b args) #t #f)]
                 [((node/expr/op/- arity args) b)
-                 (equal? (first args) b)]
+                 (equal? (car args) b)]
                 [(_ _) #f])]))
 
 (define (simplify-identity-values t)

@@ -35,26 +35,26 @@
   (unless (false? max-length)
     (when (> (length args) max-length)
       (raise-arguments-error op "too many arguments" "maximum" max-length "got" (length args))))
-  (for ([a args])
+  (for ([a (in-list args)])
     (unless (type? a)
       (raise-argument-error op (~v type?) a))
     (unless (false? arity)
       (unless (equal? (node/expr-arity a) arity)
         (raise-argument-error op (format "expression with arity ~v" arity) a))))
   (when same-arity?
-    (let ([arity (node/expr-arity (first args))])
-      (for ([a args])
+    (let ([arity (node/expr-arity (car args))])
+      (for ([a (in-list args)])
         (unless (equal? (node/expr-arity a) arity)
           (raise-arguments-error op "arguments must have same arity"
                                  "got" arity "and" (node/expr-arity a))))))
   (when join?
-    (when (<= (apply join-arity (for/list ([a args]) (node/expr-arity a))) 0)
+    (when (<= (apply join-arity (for/list ([a (in-list args)]) (node/expr-arity a))) 0)
       (raise-arguments-error op "join would create a relation of arity 0")))
   (when range?
-    (unless (equal? (node/expr-arity (second args)) 1)
+    (unless (equal? (node/expr-arity (cadr args)) 1)
       (raise-arguments-error op "second argument must have arity 1")))
   (when domain?
-    (unless (equal? (node/expr-arity (first args)) 1)
+    (unless (equal? (node/expr-arity (car args)) 1)
       (raise-arguments-error op "first argument must have arity 1"))))
 
 
@@ -75,20 +75,20 @@
            (struct name node/expr/op () #:transparent #:reflection-name 'id)
            (define id
              (lambda e
-               (if ($and @op (for/and ([a e]) ($not (node/expr? a))))
+               (if ($and @op (for/and ([a (in-list e)]) ($not (node/expr? a))))
                    (apply @op e)
                    (begin
                      (check-args 'id e node/expr? checks ...)
-                     (let ([arities (for/list ([a e]) (node/expr-arity a))])
+                     (let ([arities (for/list ([a (in-list e)]) (node/expr-arity a))])
                        (name (apply arity arities) e)))))))))]
     [(_ id arity checks ...)
      (syntax/loc stx
        (define-expr-op id arity checks ... #:lift #f))]))
 
 (define get-first
-  (lambda e (first e)))
+  (lambda e (car e)))
 (define get-second
-  (lambda e (second e)))
+  (lambda e (cadr e)))
 (define-syntax-rule (define-op/combine id @op)
   (define-expr-op id get-first #:same-arity? #t #:lift @op))
 
@@ -190,7 +190,7 @@
            (struct name node/formula/op () #:transparent #:reflection-name 'id)
            (define id
              (lambda e
-               (if ($and @op (for/and ([a e]) ($not (type? a))))
+               (if ($and @op (for/and ([a (in-list e)]) ($not (type? a))))
                    (apply @op e)
                    (begin
                      (check-args 'id e type? checks ...)
@@ -236,7 +236,7 @@
      (match-define (node/formula/quantified quantifier decls formula) self)
      (fprintf port "(~a [~a] ~a)" quantifier decls formula))])
 (define (quantified-formula quantifier decls formula)
-  (for ([e (map cdr decls)])
+  (for ([e (in-list (map cdr decls))])
     (unless (node/expr? e)
       (raise-argument-error quantifier "expr?" e))
     (unless (equal? (node/expr-arity e) 1)

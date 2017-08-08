@@ -14,15 +14,15 @@
     [(node/expr/relation arity name) (string->symbol name)]
     [(node/expr/constant expr type) type]
     [(node/expr/comprehension arity decls formula)
-     `(set (,@(for/list ([d decls]) `[,(ast->datum (car d)) ,(ast->datum (cdr d))])) ,(ast->datum formula))]
+     `(set (,@(for/list ([d (in-list decls)]) `[,(ast->datum (car d)) ,(ast->datum (cdr d))])) ,(ast->datum formula))]
     [(node/formula/quantified quantifier decls formula)
-     `(,quantifier (,@(for/list ([d decls]) `[,(ast->datum (car d)) ,(ast->datum (cdr d))])) ,(ast->datum formula))]
+     `(,quantifier (,@(for/list ([d (in-list decls)]) `[,(ast->datum (car d)) ,(ast->datum (cdr d))])) ,(ast->datum formula))]
     [(node/formula/multiplicity mult expr)
      `(,mult ,(ast->datum expr))]
     [(node/expr/op arity children)
-     `(,(op-name ast) ,@(for/list ([c children]) (ast->datum c)))]
+     `(,(op-name ast) ,@(for/list ([c (in-list children)]) (ast->datum c)))]
     [(node/formula/op children)
-     `(,(op-name ast) ,@(for/list ([c children]) (ast->datum c)))]))
+     `(,(op-name ast) ,@(for/list ([c (in-list children)]) (ast->datum c)))]))
 
 ;; converting ASTs to alloy expressions ----------------------------------------
 (define (op->alloy op)

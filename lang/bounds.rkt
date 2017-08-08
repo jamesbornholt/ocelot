@@ -11,10 +11,10 @@
 
 ; Error-checking constructors for bounds
 (define (make-bound relation lower upper)
-  (for ([t lower])
+  (for ([t (in-list lower)])
     (unless (and (list? t) (= (length t) (relation-arity relation)))
       (raise-arguments-error 'make-bound "bounds must contain tuples" "lower" t)))
-  (for ([t upper])
+  (for ([t (in-list upper)])
     (unless (and (list? t) (= (length t) (relation-arity relation)))
       (raise-arguments-error 'make-bound "bounds must contain tuples" "upper" t)))
   (bound relation lower upper))
@@ -30,15 +30,15 @@
 
 ; Get the upper bound for a relation r in a bounds? object
 (define (get-upper-bound bnds r)
-  (for/first ([b (bounds-entries bnds)] #:when (equal? (bound-relation b) r))
+  (for/first ([b (in-list (bounds-entries bnds))] #:when (equal? (bound-relation b) r))
     (bound-upper b)))
 
 ; get a list of all relations bound by a bounds? object
 (define (bounds-variables bnds)
-  (for/list ([b (bounds-entries bnds)]) (bound-relation b)))
+  (for/list ([b (in-list (bounds-entries bnds))]) (bound-relation b)))
 
 ; Combine several sets of bounds, which must be mutually disjoint and share the
 ; same universe
 (define (bounds-union . lbnds)
   (define U (bounds-universe (car lbnds)))
-  (bounds U (for*/list ([bnds lbnds][bnd (bounds-entries bnds)]) bnd)))
+  (bounds U (for*/list ([bnds (in-list lbnds)][bnd (in-list (bounds-entries bnds))]) bnd)))

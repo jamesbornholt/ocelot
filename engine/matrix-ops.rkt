@@ -7,20 +7,20 @@
 (provide (all-defined-out))
 
 (define (matrix/nary-op universe op args)
-  (for/fold ([A (car args)]) ([B (cdr args)])
+  (for/fold ([A (car args)]) ([B (in-list (cdr args))])
     (op universe A B)))
 
 (define (matrix/and universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (matrix (for/list ([a A][b B]) (and a b)))))
+    (matrix (for/list ([a (in-list A)][b (in-list B)]) (and a b)))))
 
 (define (matrix/or universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (matrix (for/list ([a A][b B]) (or a b)))))
+    (matrix (for/list ([a (in-list A)][b (in-list B)]) (or a b)))))
 
 (define (matrix/difference universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (matrix (for/list ([a A][b B]) (and a (not b))))))
+    (matrix (for/list ([a (in-list A)][b (in-list B)]) (and a (not b))))))
 
 (define (matrix/dot universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
@@ -48,12 +48,12 @@
 
 (define (matrix/cross universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (matrix (for*/list ([a A][b B]) (and a b)))))
+    (matrix (for*/list ([a (in-list A)][b (in-list B)]) (and a b)))))
 
 (define (matrix/transpose universe A)
   (for/all ([A (matrix-entries A)])
     (let* ([univSize (universe-size universe)])
-      (matrix (for*/list ([i univSize] [j univSize])
+      (matrix (for*/list ([i (in-range univSize)] [j (in-range univSize)])
                 (list-ref A (+ (* univSize j) i)))))))
 
 (define (matrix/closure universe A)
@@ -75,7 +75,7 @@
       (let* ([arityA (matrix-arity universe A)]
              [denomA ($expt univSize ($- arityA 1))]
              [size ($expt univSize arityA)])
-        (matrix (for/list ([i size][a A])
+        (matrix (for/list ([i (in-range size)][a (in-list A)])
                   (and a (list-ref Ds ($quotient i denomA)))))))))
 
 ; evaluate A :> R
@@ -84,18 +84,18 @@
     (for*/all ([A (matrix-entries A)][Rs (matrix-entries R)])
       (let* ([arityA (matrix-arity universe A)]
              [size ($expt univSize arityA)])
-        (matrix (for/list ([i size][a A])
+        (matrix (for/list ([i (in-range size)][a (in-list A)])
                   (and a (list-ref Rs ($remainder i univSize)))))))))
 
 ; is A a subset of B? i.e., if x in A, then x in B ≡ x in A ⇒ x in B
 (define (matrix/subset? universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (apply && (for/list ([a A][b B]) (=> a b)))))
+    (apply && (for/list ([a (in-list A)][b (in-list B)]) (=> a b)))))
 
 ; is A equal to B? i.e. x in A iff x in B
 (define (matrix/equal? universe A B)
   (for*/all ([A (matrix-entries A)][B (matrix-entries B)])
-    (apply && (for/list ([a A][b B]) (<=> a b)))))
+    (apply && (for/list ([a (in-list A)][b (in-list B)]) (<=> a b)))))
 
 ; does A contain exactly one element?
 (define (matrix/one? universe A)

@@ -26,19 +26,19 @@
 (define (interpret-body formula universe relations cache)
   (match formula
     [(node/expr/op arity args)
-     (let ([args* (for/list ([a args]) (interpret-rec a universe relations cache))])
+     (let ([args* (for/list ([a (in-list args)]) (interpret-rec a universe relations cache))])
        (interpret-expr-op universe formula args*))]
     [(node/expr/relation arity name)
      (hash-ref relations formula (thunk (error 'interpret "unbound relation ~a" formula)))]
     [(node/expr/constant arity type)
      (interpret-constant universe type)]
     [(node/expr/comprehension arity decls f)
-     (let ([decls* (for/list ([d decls]) (cons (car d) (interpret-rec (cdr d) universe relations cache)))])
+     (let ([decls* (for/list ([d (in-list decls)]) (cons (car d) (interpret-rec (cdr d) universe relations cache)))])
        (interpret-comprehension universe relations decls* f cache))]
     [(node/formula/op args)
      (interpret-formula-op universe relations formula args cache)]
     [(node/formula/quantified quantifier decls f)
-     (let ([decls* (for/list ([d decls]) (cons (car d) (interpret-rec (cdr d) universe relations cache)))])
+     (let ([decls* (for/list ([d (in-list decls)]) (cons (car d) (interpret-rec (cdr d) universe relations cache)))])
        (interpret-quantifier universe relations quantifier decls* f cache))]
     [(node/formula/multiplicity mult expr)
      (let ([expr* (interpret-rec expr universe relations cache)])
@@ -50,7 +50,8 @@
     ['none (matrix (make-list (universe-size universe) #f))]
     ['univ (matrix (make-list (universe-size universe) #t))]
     ['iden (let ([size (universe-size universe)])
-             (matrix (for*/list ([i size][j size]) (= i j))))]))
+             (matrix (for*/list ([i (in-range size)][j (in-range size)])
+                       (= i j))))]))
 
 
 (define (interpret-expr-op universe op args)
@@ -64,19 +65,19 @@
     [(? node/expr/op/->?)
      (matrix/nary-op universe matrix/cross args)]
     [(? node/expr/op/~?)
-     (matrix/transpose universe (first args))]
+     (matrix/transpose universe (car args))]
     [(? node/expr/op/join?)
      (matrix/nary-op universe matrix/dot args)]
     [(? node/expr/op/^?)
-     (matrix/closure universe (first args))]
+     (matrix/closure universe (car args))]
     [(? node/expr/op/*?)
      (let ([iden (interpret-constant universe 'iden)]
-           [^A   (matrix/closure universe (first args))])
+           [^A   (matrix/closure universe (car args))])
        (matrix/or universe ^A iden))]
     [(? node/expr/op/<:?)
-     (matrix/domain universe (first args) (second args))]
+     (matrix/domain universe (car args) (second args))]
     [(? node/expr/op/:>?)
-     (matrix/range universe (first args) (second args))]))
+     (matrix/range universe (car args) (second args))]))
 
 
 (define (interpret-comprehension universe relations decls f cache)
@@ -85,7 +86,7 @@
     (if (null? decls)
         (list (and pre (interpret-rec f universe relations (and cache (hash-copy cache)))))
         (match-let ([(cons v r) (car decls)])
-          (append* (for/list ([i usize][val (matrix-entries r)])
+          (append* (for/list ([i (in-range usize)][val (in-list (matrix-entries r))])
                      (if ($false? val)
                          (make-list (expt usize (sub1 (length decls))) #f)
                          (begin
@@ -112,17 +113,17 @@
     [(? node/formula/op/||?)
      (interpret-formula-short-circuit rec args || #f #t)]
     [(? node/formula/op/=>?)
-     (or (not (rec (first args))) (rec (second args)))]
+     (or (not (rec (car args))) (rec (second args)))]
     [_ (let ([args ($map rec args)])
          (match op
            [(? node/formula/op/in?)
-            (let ([A (first args)] [B (second args)])
+            (let ([A (car args)] [B (second args)])
               (matrix/subset? universe A B))]
            [(? node/formula/op/=?)
-            (let ([A (first args)] [B (second args)])
+            (let ([A (car args)] [B (second args)])
               (matrix/equal? universe A B))]
            [(? node/formula/op/!?)
-            (not (first args))]))]))
+            (not (car args))]))]))
 
 
 ; quantifier: 'all or 'some
@@ -135,7 +136,7 @@
       (if (null? decls)
           (interpret-rec f universe relations (and cache (hash-copy cache)))
           (match-let ([(cons v r) (car decls)])
-            (apply op (for/list ([i usize][val (matrix-entries r)] #:unless ($false? val))
+            (apply op (for/list ([i (in-range usize)][val (in-list (matrix-entries r))] #:unless ($false? val))
                         (hash-set! relations v (singleton-matrix universe i))
                         (begin0
                           (conn val (rec (cdr decls)))
