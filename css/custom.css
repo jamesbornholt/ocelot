@@ -102,3 +102,10 @@ hr {
     margin: 1em auto;
     max-width: 500px;
 }
+
+.callout {
+    background: #B3E6FF;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #45BAF3;
+}

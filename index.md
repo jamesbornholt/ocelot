@@ -21,6 +21,10 @@ Ocelot is developed at the [University of Washington](http://cs.washington.edu)
 by [James Bornholt](https://homes.cs.washington.edu/~bornholt/)
 and [Emina Torlak](https://homes.cs.washington.edu/~emina/).
 
+<div class="callout">
+Check out this demo code: <a href="https://github.com/uwplse/memsynth/blob/repair-demo/case-studies/repair/axioms.rkt">axioms.rkt</a>, <a href="https://github.com/uwplse/memsynth/blob/repair-demo/case-studies/repair/repair.rkt">repair.rkt</a>.
+</div>
+
 ### Getting started
 
 Ocelot is available through the [Racket](https://racket-lang.org) package manager:
